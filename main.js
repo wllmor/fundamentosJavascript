@@ -72,34 +72,68 @@ window.addEventListener("load",function(){
         let pass = passInput.value
         let email = emailInput.value 
 
-        const usuario= new Usuario(nombre,apellidos,pass.email);
+        const usuario= new Usuario(nombre,apellidos,pass,email);
         const validador = new ValidarUsuario();
 
-        let resultados = validador.validarTodos(usuario);
+        let errores = validador.validarTodos(usuario);
 
-        for (const resultado of resultados) {
+        if (errores.length === 0){
+            // fetch al servidor 
+            fetch("http://localhost:8000", {
+                method: "POST",
+                body: JSON.stringify({
+                    user: {
+                        nombre: usuario.nombre,
+                        apellidos: usuario.apellidos,
+                        email: usuario.email,
+                        pass: usuario.pass,
+                    }
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }). then(function(response){
+                response.json().then((data) => {
+                    console.log(data.id)
+                })
+            }).catch(function(error){
+                console.warn(error)
+            })    
+
+        } else {
+            for (const resultado of errores) {
             
-            switch (resultado.codigo) {
-                case 1: 
-                    alertBoxMessage.innerHTML = resultado.motivo
-                    alertBox.classList.add("alerta-error")
-                    alertBox.style.top = 0
-                    nombreInput.value = ""
-                    break;
-                case 2: 
-                    alertBoxMessage.innerHTML = resultado.motivo
-                    alertBox.style.top = 0
-                    apellidosInput.value = ""
-                    break;
-                case 3: 
-                    alertBoxMessage.innerHTML = resultado.motivo
-                    alertBox.style.top = 0
-                    passInput.value = ""
-                    break;
+                switch (resultado.codigo) {
+                    case 1: 
+                        alertBoxMessage.innerHTML = resultado.motivo
+                        alertBox.classList.add("alerta-error")
+                        alertBox.style.top = 0
+                        nombreInput.value = ""
+                        break;
+                    case 2: 
+                        alertBoxMessage.innerHTML = resultado.motivo
+                        alertBox.classList.add("alerta-error")
+                        alertBox.style.top = 0
+                        apellidosInput.value = ""
+                        break;
+                    case 3: 
+                        alertBoxMessage.innerHTML = resultado.motivo
+                        alertBox.classList.add("alerta-error")
+                        alertBox.style.top = 0
+                        passInput.value = ""
+                        break;
             }
+            
         }
 
-        console.log(resultados)
+        // subimos la alerta despues de 3 seg
+        setTimeout(() => {
+            alertBox.style = -100 
+
+        },3000)
+    }    
+
+    //    console.log(resultados)
 
     });    
 
